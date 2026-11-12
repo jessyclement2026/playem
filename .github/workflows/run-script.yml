@@ -2,10 +2,11 @@ name: Run Playwright Script Every 10 Minutes
 
 on:
   schedule:
-    # Runs every 10 minutes
     - cron: '*/10 * * * *'
-  # Allows manual triggers from the Actions tab
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-script:
@@ -26,7 +27,14 @@ jobs:
           pip install playwright
 
       - name: Install Playwright browsers
-        run: python -m playwright install --with-deps
+        run: python -m playwright install --with-deps firefox
 
       - name: Run Python script
-        run: python my_script.py
+        run: python your_script.py
+
+      - name: Commit and push thyujk.m3u
+        run: |
+          git config --local user.email "github-actions[bot]@://github.com"
+          git config --local user.name "github-actions[bot]"
+          git add playlist.m3u
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update playlist.m3u" && git push)
