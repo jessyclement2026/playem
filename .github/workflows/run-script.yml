@@ -30,7 +30,7 @@ jobs:
         run: python -m playwright install --with-deps firefox
 
       - name: Run Python script
-        run: python your_script.py
+        run: python my_script.py
 
       - name: Commit and push thyujk.m3u
         run: |
