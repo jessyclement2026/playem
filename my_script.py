@@ -134,7 +134,7 @@ def main():
         f.write("#EXTM3U\n")
         f.write("\n".join(playlist_entries))
 
-    print(f"\nFinished! Compiled {len(playlist_entries)} complete links inside playlist.m3u.")
+    print(f"\nFinished! Compiled {len(playlist_entries)} complete links inside thyujk.m3u.")
 
 if __name__ == "__main__":
     main()
