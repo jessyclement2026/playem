@@ -89,10 +89,8 @@
     const searchInput = document.getElementById('search');
     let allChannels = [];
 
-    // List all .m3u files you want to combine
     const playlistFiles = ['playlist.m3u', 'athjdf.m3u'];
 
-    // Fetch all playlists simultaneously
     Promise.all(
       playlistFiles.map(file =>
         fetch(`${file}?t=${Date.now()}`)
@@ -121,8 +119,8 @@
         if (line.startsWith('#EXTINF:')) {
           const commaIndex = line.lastIndexOf(',');
           currentName = commaIndex !== -1 ? line.slice(commaIndex + 1).trim() : 'Unknown Channel';
-          const logoMatch = line.match(/tvg-logo="([^"]*)"/);
-          currentLogo = logoMatch ? logoMatch : '';
+          const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
+          currentLogo = logoMatch ? logoMatch[1].trim() : '';
         } else if (line.startsWith('http')) {
           allChannels.push({
             name: currentName,
@@ -139,7 +137,7 @@
         const item = document.createElement('div');
         item.className = 'channel';
         item.innerHTML = `
-          ${ch.logo ? `<img src="${ch.logo}" onerror="this.style.display='none'">` : ''}
+          ${ch.logo ? `<img src="${ch.logo}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ''}
           <span>${ch.name}</span>
         `;
         item.onclick = () => {
