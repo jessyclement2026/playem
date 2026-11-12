@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Play 'Em</title>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/cdn@10.3.0/media/hlsjs-video.js"></script> 
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/cdn@10.3.0/media/hlsjs-video.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -35,6 +35,35 @@
       color: #ffd700;
       font-weight: bold;
       text-decoration: underline;
+    }
+    #addon-box {
+      padding: 10px 12px;
+      margin: 10px 10px 0 10px;
+      background: #1e2229;
+      border: 1px solid #343b48;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    #addon-box a {
+      color: #58a6ff;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    #addon-box a:hover {
+      text-decoration: underline;
+    }
+    .addon-links {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #bbb;
+    }
+    .contact-row {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid #2e3440;
+      font-size: 12px;
+      color: #bbb;
     }
     .token-row {
       display: flex;
@@ -138,7 +167,7 @@
     <div id="unlock-box">
       <div>
         <strong>🔒 Unlock All Channels:</strong> Pay to unlock restricted channels. 
-        <a href="https://your-payment-link.com" target="_blank" rel="noopener noreferrer">Click here to pay and verify your transaction</a> to receive your access token.
+        <a href="https://your-payment-link.com" target="_blank" rel="noopener noreferrer">Click here to pay and verify your transaction hash</a> to receive your access token.
       </div>
       <div class="token-row">
         <input type="text" id="token-input" placeholder="Paste your unlock token..." />
@@ -147,10 +176,25 @@
       <div id="token-status"></div>
     </div>
 
+    <!-- Stremio / Nuvio Addon & Contact Box -->
+    <div id="addon-box">
+      <div>
+        🧩 <strong>Stremio / Nuvio Addon:</strong> 
+        <a href="https://your-addon-link.com" target="_blank" rel="noopener noreferrer">Install Addon</a>
+      </div>
+      <div class="addon-links">
+        Get the apps: 
+        <a href="https://stremio.com" target="_blank" rel="noopener noreferrer">Stremio</a> • 
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer">Nuvio</a>
+      </div>
+      <div class="contact-row">
+        ✉️ Support: <a href="mailto:alliptv@atomicmail.io">alliptv@atomicmail.io</a>
+      </div>
+    </div>
+
     <input type="text" id="search" placeholder="Search channels..." />
     <div id="channel-list">Loading playlists...</div>
   </div>
-
   <div id="main">
     <h2 id="now-playing">Select a channel</h2>
     <hlsjs-video id="player" controls autoplay playsinline></hlsjs-video>
@@ -167,7 +211,7 @@
     const tokenStatus = document.getElementById('token-status');
 
     // CONFIGURATION
-    const LOAD_TIMEOUT_MS = 7000; // Time in ms before an unplaying stream is marked locked
+    const LOAD_TIMEOUT_MS = 7000;
     const VALID_TOKENS = ['VIP-2026-UNLOCK', 'ACCESS-GRANTED-99'];
 
     let allChannels = [];
@@ -228,13 +272,11 @@
       player.removeAttribute('src');
       titleDisplay.textContent = `🔒 ${channel.name} is Locked — Pay & enter your token on the left to unlock.`;
       
-      // Re-render current list preserving search filter
       const term = searchInput.value.toLowerCase();
       const filtered = allChannels.filter(ch => ch.name.toLowerCase().includes(term));
       renderChannels(filtered);
     }
 
-    // Listen for stream errors or successful playback
     player.addEventListener('error', () => {
       clearTimeout(loadTimer);
       markChannelAsLocked(activeChannel);
@@ -264,7 +306,6 @@
         item.onclick = () => {
           clearTimeout(loadTimer);
 
-          // If it already failed once and user hasn't unlocked yet, block immediately
           if (showLocked) {
             titleDisplay.textContent = `🔒 ${ch.name} is Locked — Pay & enter your token on the left to unlock.`;
             player.removeAttribute('src');
@@ -278,7 +319,6 @@
           titleDisplay.textContent = `Loading ${ch.name}...`;
           player.setAttribute('src', ch.url);
 
-          // Start a timeout in case the stream hangs or fails silently
           loadTimer = setTimeout(() => {
             if (player.readyState < 2) {
               markChannelAsLocked(ch);
