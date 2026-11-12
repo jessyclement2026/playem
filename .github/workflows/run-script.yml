@@ -26,7 +26,7 @@ jobs:
           pip install playwright
 
       - name: Install Playwright browsers
-        run: playwright install --with-deps chromium
+        run: python -m playwright install --with-deps
 
       - name: Run Python script
         run: python my_script.py
