@@ -74,7 +74,7 @@
 
   <div id="sidebar">
     <input type="text" id="search" placeholder="Search channels..." />
-    <div id="channel-list">Loading playlist...</div>
+    <div id="channel-list">Loading playlists...</div>
   </div>
 
   <div id="main">
@@ -89,16 +89,27 @@
     const searchInput = document.getElementById('search');
     let allChannels = [];
 
-    // Fetch playlist.m3u from the same folder
-    fetch('playlist.m3u?t=' + Date.now())
-      .then(response => response.text())
-      .then(text => {
-        parseM3U(text);
-        renderChannels(allChannels);
-      })
-      .catch(() => {
-        listContainer.innerHTML = '<p style="padding:14px;">Could not load playlist.m3u</p>';
+    // List all .m3u files you want to combine
+    const playlistFiles = ['playlist.m3u', 'athjdf.m3u'];
+
+    // Fetch all playlists simultaneously
+    Promise.all(
+      playlistFiles.map(file =>
+        fetch(`${file}?t=${Date.now()}`)
+          .then(res => (res.ok ? res.text() : ''))
+          .catch(() => '')
+      )
+    ).then(results => {
+      results.forEach(text => {
+        if (text) parseM3U(text);
       });
+
+      if (allChannels.length > 0) {
+        renderChannels(allChannels);
+      } else {
+        listContainer.innerHTML = '<p style="padding:14px;">Could not load any playlists.</p>';
+      }
+    });
 
     function parseM3U(data) {
       const lines = data.split('\n');
@@ -111,7 +122,7 @@
           const commaIndex = line.lastIndexOf(',');
           currentName = commaIndex !== -1 ? line.slice(commaIndex + 1).trim() : 'Unknown Channel';
           const logoMatch = line.match(/tvg-logo="([^"]*)"/);
-          currentLogo = logoMatch ? logoMatch[1] : '';
+          currentLogo = logoMatch ? logoMatch : '';
         } else if (line.startsWith('http')) {
           allChannels.push({
             name: currentName,
