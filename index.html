@@ -166,8 +166,8 @@
     <!-- Payment & Unlock Instructions -->
     <div id="unlock-box">
       <div>
-        <strong>🔒 Unlock All Channels:</strong> Pay to unlock restricted channels. 
-        <a href="https://your-payment-link.com" target="_blank" rel="noopener noreferrer">Click here to pay and verify your transaction hash</a> to receive your access token.
+        <strong>🔒 Unlock All Channels:</strong> Pay to unlock restricted channels and watch them here in browser or on Stremio/Nuvio. 
+        <a href="https://fun.playem.workers.dev/configure" target="_blank" rel="noopener noreferrer">Click here to pay and verify your transaction hash</a> to receive your access token.
       </div>
       <div class="token-row">
         <input type="text" id="token-input" placeholder="Paste your unlock token..." />
@@ -180,15 +180,15 @@
     <div id="addon-box">
       <div>
         🧩 <strong>Stremio / Nuvio Addon:</strong> 
-        <a href="https://your-addon-link.com" target="_blank" rel="noopener noreferrer">Install Addon</a>
+           <a href="https://fun.playem.workers.dev/manifest.json" onclick="event.preventDefault(); navigator.clipboard.writeText(this.href); this.textContent='Copied!'; setTimeout(() => this.textContent='Install Addon', 2000);">Install Addon</a>
       </div>
       <div class="addon-links">
         Get the apps: 
         <a href="https://stremio.com" target="_blank" rel="noopener noreferrer">Stremio</a> • 
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer">Nuvio</a>
+        <a href="https://nuvio.tv" target="_blank" rel="noopener noreferrer">Nuvio</a>
       </div>
       <div class="contact-row">
-        ✉️ Support: <a href="mailto:alliptv@atomicmail.io">alliptv@atomicmail.io</a>
+        ✉️ Support: <a href="mailto:playem@atomicmail.io">playem@atomicmail.io</a>
       </div>
     </div>
 
