@@ -50,7 +50,7 @@ def format_title(raw_filename):
     """Converts 'hustler-hd.html' to 'Hustler HD'"""
     base_name = os.path.splitext(raw_filename)[0]
     clean_name = base_name.replace("-", " ").title()
-    
+
     replacements = {
         " Hd": " HD",
         " Tv": " TV",
@@ -60,20 +60,20 @@ def format_title(raw_filename):
     for search, replace in replacements.items():
         if clean_name.endswith(search) or search + " " in clean_name:
             clean_name = clean_name.replace(search, replace)
-            
+
     return clean_name
 
 def fetch_stream_link(item):
     """Worker function executed by each thread to fetch a single stream link."""
     full_url = f"{BASE_URL}{item}"
     display_name = format_title(item)
-    logo_base = os.path.splitext(item)[0] 
+    logo_base = os.path.splitext(item)[0]
     full_logo_url = f"{BASE_URL}images/{logo_base}.png"
-    
+
     with sync_playwright() as p:
         browser = p.firefox.launch(headless=True)
         page = browser.new_page()
-        
+
         state = {"found_link": None}
 
         # Custom inline handler to catch the exact full tokenized .m3u8 path
@@ -83,8 +83,8 @@ def fetch_stream_link(item):
                 # FIX: We split by '?' to completely remove web tokens/arguments,
                 # but we keep the ENTIRE rest of the URL path structure intact.
                 clean_url = url.split("?")[0]
-                
-                # VALIDATION: Check if this is the full token link with deep folder structure. 
+
+                # VALIDATION: Check if this is the full token link with deep folder structure.
                 # Long working links must have 6 or more slashes.
                 if clean_url.count("/") >= 6:
                     # Overwrite continuously so we always grab the last, most deep sub-playlist (.m3u8) request
@@ -97,7 +97,7 @@ def fetch_stream_link(item):
             print(f"[START] Processing: {display_name}")
             page.goto(f"{full_url}?t={int(time.time())}", timeout=20000)
             page.wait_for_timeout(6000)  # Increased slightly to give the player time to request sub-tracks/resolutions
-            
+
             if state["found_link"]:
                 # Generates standard IPTV entry with User-Agent properties to prevent stream player mismatches
                 entry = (
@@ -118,13 +118,13 @@ def fetch_stream_link(item):
 
 def main():
     playlist_entries = []
-    MAX_WORKERS = 5 
-    
+    MAX_WORKERS = 5
+
     print(f"Starting parallel execution with {MAX_WORKERS} workers...")
-    
+
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(fetch_stream_link, item): item for item in pages}
-        
+
         for future in as_completed(futures):
             result = future.result()
             if result:
@@ -134,7 +134,7 @@ def main():
         f.write("#EXTM3U\n")
         f.write("\n".join(playlist_entries))
 
-    print(f"\nFinished! Compiled {len(playlist_entries)} complete links inside thyujk.m3u.")
+    print(f"\nFinished! Compiled {len(playlist_entries)} complete links inside playlist.m3u.")
 
 if __name__ == "__main__":
     main()
