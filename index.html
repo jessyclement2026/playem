@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play 'Em</title>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/cdn@10.3.0/media/hlsjs-video.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #121212;
+      color: #ffffff;
+    }
+    #sidebar {
+      width: 320px;
+      border-right: 1px solid #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      background: #181818;
+    }
+    #search {
+      padding: 12px;
+      margin: 10px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: #222;
+      color: #fff;
+      font-size: 14px;
+    }
+    #channel-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .channel {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #222;
+    }
+    .channel:hover, .channel.active {
+      background: #2c2c2c;
+    }
+    .channel img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      background: #000;
+      border-radius: 4px;
+    }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    hlsjs-video {
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <input type="text" id="search" placeholder="Search channels..." />
+    <div id="channel-list">Loading playlist...</div>
+  </div>
+
+  <div id="main">
+    <h2 id="now-playing">Select a channel</h2>
+    <hlsjs-video id="player" controls autoplay playsinline></hlsjs-video>
+  </div>
+
+  <script>
+    const player = document.getElementById('player');
+    const listContainer = document.getElementById('channel-list');
+    const titleDisplay = document.getElementById('now-playing');
+    const searchInput = document.getElementById('search');
+    let allChannels = [];
+
+    // Fetch playlist.m3u from the same folder
+    fetch('playlist.m3u?t=' + Date.now())
+      .then(response => response.text())
+      .then(text => {
+        parseM3U(text);
+        renderChannels(allChannels);
+      })
+      .catch(() => {
+        listContainer.innerHTML = '<p style="padding:14px;">Could not load playlist.m3u</p>';
+      });
+
+    function parseM3U(data) {
+      const lines = data.split('\n');
+      let currentName = '';
+      let currentLogo = '';
+
+      lines.forEach(line => {
+        line = line.trim();
+        if (line.startsWith('#EXTINF:')) {
+          const commaIndex = line.lastIndexOf(',');
+          currentName = commaIndex !== -1 ? line.slice(commaIndex + 1).trim() : 'Unknown Channel';
+          const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+          currentLogo = logoMatch ? logoMatch[1] : '';
+        } else if (line.startsWith('http')) {
+          allChannels.push({
+            name: currentName,
+            logo: currentLogo,
+            url: line
+          });
+        }
+      });
+    }
+
+    function renderChannels(channels) {
+      listContainer.innerHTML = '';
+      channels.forEach(ch => {
+        const item = document.createElement('div');
+        item.className = 'channel';
+        item.innerHTML = `
+          ${ch.logo ? `<img src="${ch.logo}" onerror="this.style.display='none'">` : ''}
+          <span>${ch.name}</span>
+        `;
+        item.onclick = () => {
+          document.querySelectorAll('.channel').forEach(el => el.classList.remove('active'));
+          item.classList.add('active');
+          titleDisplay.textContent = ch.name;
+          player.setAttribute('src', ch.url);
+        };
+        listContainer.appendChild(item);
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = allChannels.filter(ch => ch.name.toLowerCase().includes(term));
+      renderChannels(filtered);
+    });
+  </script>
+
+</body>
+</html>
